@@ -69,7 +69,9 @@ function drawSignature(event) { if (!isDrawing) return; const point = signatureP
 function endSignature(event) { if (!isDrawing) return; isDrawing = false; lastPoint = null; if (signatureCanvas.hasPointerCapture(event.pointerId)) signatureCanvas.releasePointerCapture(event.pointerId); }
 signatureCanvas.addEventListener('pointerdown', beginSignature); signatureCanvas.addEventListener('pointermove', drawSignature); signatureCanvas.addEventListener('pointerup', endSignature); signatureCanvas.addEventListener('pointercancel', endSignature);
 penSize.oninput = () => { document.querySelector('#pen-size-output').textContent = penSize.value; };
-document.querySelector('#open-signature-pad').onclick = () => { dropZone.classList.add('hidden'); workspace.classList.add('hidden'); signaturePad.classList.remove('hidden'); setMessage(''); };
+function openSignaturePad() { dropZone.classList.add('hidden'); workspace.classList.add('hidden'); signaturePad.classList.remove('hidden'); setMessage(''); }
+document.querySelector('#open-signature-pad').onclick = openSignaturePad;
+document.querySelector('#open-signature-pad-empty').onclick = event => { event.stopPropagation(); openSignaturePad(); };
 document.querySelector('#back-to-editor').onclick = () => { signaturePad.classList.add('hidden'); if (original) workspace.classList.remove('hidden'); else dropZone.classList.remove('hidden'); };
 document.querySelector('#undo-signature').onclick = () => { const previous = signatureHistory.pop(); if (previous) { signatureContext.putImageData(previous.image, 0, 0); signatureHasInk = previous.hasInk; } setSignatureBoardState(); };
 document.querySelector('#clear-signature').onclick = () => { saveSignature(); signatureContext.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); signatureHasInk = false; setSignatureBoardState(); };
