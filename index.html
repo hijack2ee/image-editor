@@ -10,7 +10,7 @@
     <main class="app-shell">
       <header>
         <a class="brand" href="/" aria-label="컷아웃 홈"><span>✦</span> cutout</a>
-        <p>사진에서 피사체만 남기세요.</p>
+        <button id="open-signature-pad" class="header-action" type="button">서명 그리기</button>
       </header>
 
       <section class="editor" aria-labelledby="page-title">
@@ -57,6 +57,27 @@
             <button id="download-button" class="button button-download" type="button">PNG로 다운로드 <span>↓</span></button>
             <button id="new-image-button" class="text-button" type="button">다른 이미지 선택</button>
           </aside>
+        </section>
+        <section id="signature-pad" class="signature-pad hidden" aria-labelledby="signature-title">
+          <div class="signature-intro">
+            <span class="eyebrow">SIGNATURE PAD</span>
+            <h2 id="signature-title">서명을 그려주세요</h2>
+            <p>마우스나 터치로 서명한 뒤 투명 PNG로 저장할 수 있습니다.</p>
+          </div>
+          <div class="signature-board checkerboard">
+            <canvas id="signature-canvas" width="1200" height="520" aria-label="서명을 그리는 캔버스"></canvas>
+            <span class="signature-placeholder">이곳에 서명하세요</span>
+          </div>
+          <div class="signature-tools">
+            <label for="pen-size">펜 굵기 <output id="pen-size-output">4</output></label>
+            <input id="pen-size" type="range" min="1" max="16" value="4" />
+            <div class="signature-actions">
+              <button id="undo-signature" class="button button-secondary" type="button">실행 취소</button>
+              <button id="clear-signature" class="button button-secondary" type="button">전체 지우기</button>
+              <button id="download-signature" class="button button-primary" type="button">PNG로 다운로드</button>
+            </div>
+          </div>
+          <button id="back-to-editor" class="text-button" type="button">이미지 편집기로 돌아가기</button>
         </section>
         <p id="message" class="message" role="status"></p>
       </section>

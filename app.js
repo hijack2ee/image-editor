@@ -7,7 +7,12 @@ const processing = document.querySelector('#processing');
 const message = document.querySelector('#message');
 const sensitivity = document.querySelector('#sensitivity');
 const sensitivityOutput = document.querySelector('#sensitivity-output');
+const signaturePad = document.querySelector('#signature-pad');
+const signatureCanvas = document.querySelector('#signature-canvas');
+const signatureContext = signatureCanvas.getContext('2d');
+const penSize = document.querySelector('#pen-size');
 let original = null, currentFile = null, mode = 'photo', rotation = 0;
+let isDrawing = false, lastPoint = null, signatureHistory = [], signatureHasInk = false;
 
 function setMessage(text = '') { message.textContent = text; }
 function draw() {
@@ -55,3 +60,17 @@ sensitivity.oninput=()=>{sensitivityOutput.textContent=sensitivity.value;}; docu
 document.querySelector('#rotate-left').onclick = () => { rotation = (rotation + 270) % 360; draw(); };
 document.querySelector('#rotate-right').onclick = () => { rotation = (rotation + 90) % 360; draw(); };
 document.querySelectorAll('.mode-button').forEach(button => button.onclick = () => { mode = button.dataset.mode; document.querySelectorAll('.mode-button').forEach(item => item.classList.toggle('active', item === button)); const signature = mode === 'signature'; sensitivity.value = signature ? 32 : 38; sensitivityOutput.textContent = sensitivity.value; document.querySelector('label[for="sensitivity"]').childNodes[0].nodeValue = signature ? '잉크 감도 ' : '배경 감도 '; document.querySelector('#sensitivity-hint').textContent = signature ? '값을 낮추면 연한 펜 자국까지 남길 수 있습니다.' : '값을 높이면 배경으로 인식하는 범위가 넓어집니다.'; document.querySelector('#remove-button').textContent = signature ? '서명 추출' : '배경 제거'; draw(); });
+
+function signaturePoint(event) { const rect = signatureCanvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * signatureCanvas.width / rect.width, y: (event.clientY - rect.top) * signatureCanvas.height / rect.height }; }
+function saveSignature() { signatureHistory.push({ image: signatureContext.getImageData(0, 0, signatureCanvas.width, signatureCanvas.height), hasInk: signatureHasInk }); if (signatureHistory.length > 30) signatureHistory.shift(); }
+function setSignatureBoardState() { document.querySelector('.signature-board').classList.toggle('has-ink', signatureHasInk); }
+function beginSignature(event) { event.preventDefault(); saveSignature(); isDrawing = true; lastPoint = signaturePoint(event); signatureCanvas.setPointerCapture(event.pointerId); signatureContext.beginPath(); signatureContext.arc(lastPoint.x, lastPoint.y, Number(penSize.value) * 1.2, 0, Math.PI * 2); signatureContext.fillStyle = '#111827'; signatureContext.fill(); signatureHasInk = true; setSignatureBoardState(); }
+function drawSignature(event) { if (!isDrawing) return; const point = signaturePoint(event); signatureContext.beginPath(); signatureContext.moveTo(lastPoint.x, lastPoint.y); signatureContext.lineTo(point.x, point.y); signatureContext.strokeStyle = '#111827'; signatureContext.lineWidth = Number(penSize.value) * 2.4; signatureContext.lineCap = 'round'; signatureContext.lineJoin = 'round'; signatureContext.stroke(); lastPoint = point; setSignatureBoardState(); }
+function endSignature(event) { if (!isDrawing) return; isDrawing = false; lastPoint = null; if (signatureCanvas.hasPointerCapture(event.pointerId)) signatureCanvas.releasePointerCapture(event.pointerId); }
+signatureCanvas.addEventListener('pointerdown', beginSignature); signatureCanvas.addEventListener('pointermove', drawSignature); signatureCanvas.addEventListener('pointerup', endSignature); signatureCanvas.addEventListener('pointercancel', endSignature);
+penSize.oninput = () => { document.querySelector('#pen-size-output').textContent = penSize.value; };
+document.querySelector('#open-signature-pad').onclick = () => { dropZone.classList.add('hidden'); workspace.classList.add('hidden'); signaturePad.classList.remove('hidden'); setMessage(''); };
+document.querySelector('#back-to-editor').onclick = () => { signaturePad.classList.add('hidden'); if (original) workspace.classList.remove('hidden'); else dropZone.classList.remove('hidden'); };
+document.querySelector('#undo-signature').onclick = () => { const previous = signatureHistory.pop(); if (previous) { signatureContext.putImageData(previous.image, 0, 0); signatureHasInk = previous.hasInk; } setSignatureBoardState(); };
+document.querySelector('#clear-signature').onclick = () => { saveSignature(); signatureContext.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); signatureHasInk = false; setSignatureBoardState(); };
+document.querySelector('#download-signature').onclick = () => { if (!signatureHasInk) return setMessage('먼저 서명을 그려 주세요.'); const a = document.createElement('a'); a.download = 'signature.png'; a.href = signatureCanvas.toDataURL('image/png'); a.click(); };
