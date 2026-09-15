@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>컷아웃 — 배경 제거</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header>
+        <a class="brand" href="/" aria-label="컷아웃 홈"><span>✦</span> cutout</a>
+        <p>사진에서 피사체만 남기세요.</p>
+      </header>
+
+      <section class="editor" aria-labelledby="page-title">
+        <div class="intro">
+          <span class="eyebrow">IMAGE EDITOR</span>
+          <h1 id="page-title">배경 제거</h1>
+          <p>일반 사진의 배경을 지우거나, 종이 위 서명만 투명 PNG로 추출하세요.</p>
+        </div>
+
+        <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="이미지 업로드">
+          <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+          <div class="upload-icon">↑</div>
+          <strong>이미지를 끌어다 놓으세요</strong>
+          <span>또는</span>
+          <button id="select-button" class="button button-primary" type="button">파일 선택</button>
+          <small>PNG, JPG, WEBP · 최대 20MB</small>
+        </div>
+
+        <section id="workspace" class="workspace hidden" aria-label="배경 제거 작업 영역">
+          <div class="canvas-wrap checkerboard">
+            <canvas id="result-canvas"></canvas>
+            <div id="processing" class="processing hidden"><span></span>배경을 분리하는 중…</div>
+          </div>
+          <aside class="controls">
+            <div class="image-meta"><span id="file-name">image.png</span><small id="image-size"></small></div>
+            <div class="mode-picker" role="group" aria-label="편집 방식">
+              <button class="mode-button active" data-mode="photo" type="button">일반 배경</button>
+              <button class="mode-button" data-mode="signature" type="button">서명 추출</button>
+            </div>
+            <div class="rotate-row" role="group" aria-label="이미지 회전">
+              <span>회전</span>
+              <div>
+                <button id="rotate-left" class="icon-button" type="button" aria-label="왼쪽으로 90도 회전">↺</button>
+                <button id="rotate-right" class="icon-button" type="button" aria-label="오른쪽으로 90도 회전">↻</button>
+              </div>
+            </div>
+            <label for="sensitivity">배경 감도 <output id="sensitivity-output">38</output></label>
+            <input id="sensitivity" type="range" min="10" max="90" value="38" />
+            <p id="sensitivity-hint" class="hint">값을 높이면 배경으로 인식하는 범위가 넓어집니다.</p>
+            <div class="control-actions">
+              <button id="reset-button" class="button button-secondary" type="button">원본 보기</button>
+              <button id="remove-button" class="button button-primary" type="button">배경 제거</button>
+            </div>
+            <button id="download-button" class="button button-download" type="button">PNG로 다운로드 <span>↓</span></button>
+            <button id="new-image-button" class="text-button" type="button">다른 이미지 선택</button>
+          </aside>
+        </section>
+        <p id="message" class="message" role="status"></p>
+      </section>
+      <footer>모든 편집은 이 브라우저 안에서 처리됩니다.</footer>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
